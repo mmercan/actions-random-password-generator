@@ -1,16 +1,20 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import {generateRandomPassword} from './randompassword'
 
-async function run(): Promise<void> {
+export async function run(): Promise<void> {
+
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    const minLength = Number(core.getInput('min-length', { required: true }));
+    const maxLength = Number(core.getInput('max-length', { required: true }));
+    const useSpecialChars = core.getInput('use-special-chars') === 'true';
+    const debug = core.getInput('debug') === 'true';
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
+    const password = generateRandomPassword(minLength, maxLength, useSpecialChars);
+    if(!debug){
+      core.setSecret(password); // mask the password in the logs
+    }
+    core.setOutput('password', password);
+    
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

@@ -24,6 +24,9 @@ $ npm install
 ```
 
 Build the typescript and package it for distribution
+
+For windows if you get "Error: error:0308010C:digital envelope routines::unsupported" PowerShell :  " $env:NODE_OPTIONS = "--openssl-legacy-provider"   "
+
 ```bash
 $ npm run build && npm run package
 ```

@@ -1,11 +1,22 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Random Password Generator'
+description: 'This Action Creates Random password'
+author: 'Matt Mercan'
 inputs:
-  milliseconds: # change this
+  min-length: 
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'minimum length of the password'
+  max-length: 
+    required: true
+    description: 'maximum length of the password'
+  use-special-chars:
+    required: false
+    description: 'is Special chacacters included (!@#$%^&*()_+-={}[]|;:,.<>?/~)'
+    default: 'false'
+  debug:
+    required: false
+    description: 'in debug mode it will NOT hide the password'
+    default: 'false'
+    
 runs:
   using: 'node16'
   main: 'dist/index.js'

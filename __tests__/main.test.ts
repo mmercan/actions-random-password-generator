@@ -1,29 +1,88 @@
-import {wait} from '../src/wait'
-import * as process from 'process'
-import * as cp from 'child_process'
-import * as path from 'path'
-import {expect, test} from '@jest/globals'
+import * as core from '@actions/core';
+import {run} from '../src/main'
+import {jest ,expect, test, describe, it, beforeEach} from '@jest/globals'
 
-test('throws invalid number', async () => {
-  const input = parseInt('foo', 10)
-  await expect(wait(input)).rejects.toThrow('milliseconds not a number')
-})
 
-test('wait 500 ms', async () => {
-  const start = new Date()
-  await wait(500)
-  const end = new Date()
-  var delta = Math.abs(end.getTime() - start.getTime())
-  expect(delta).toBeGreaterThan(450)
-})
+// mock the core functions
+jest.mock('@actions/core');
+const mockedCore = core as jest.Mocked<typeof core>;
 
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-  process.env['INPUT_MILLISECONDS'] = '500'
-  const np = process.execPath
-  const ip = path.join(__dirname, '..', 'lib', 'main.js')
-  const options: cp.ExecFileSyncOptions = {
-    env: process.env
-  }
-  console.log(cp.execFileSync(np, [ip], options).toString())
-})
+describe('run', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('generates a password with default options', async () => {
+    // set the inputs for the action
+    mockedCore.getInput.mockImplementation((name: string, options?: core.InputOptions) => {
+      if (name === 'min-length') return '12';
+      if (name === 'max-length') return '12';
+      if (name === 'use-special-chars') return 'false';
+      // if (name === 'debug') return 'false';
+      throw new Error(`Unknown input name: ${name}`);
+    });
+
+    await run();
+
+    expect(mockedCore.setSecret).toHaveBeenCalledWith(expect.any(String));
+    expect(mockedCore.setOutput).toHaveBeenCalledWith('password', expect.any(String));
+  });
+
+  it('generates a password with special characters', async () => {
+    // set the inputs for the action
+    mockedCore.getInput.mockImplementation((name: string, options?: core.InputOptions) => {
+      if (name === 'min-length') return '12';
+      if (name === 'max-length') return '12';
+      if (name === 'use-special-chars') return 'true';
+      // if (name === 'debug') return 'false';
+      throw new Error(`Unknown input name: ${name}`);
+    });
+
+    await run();
+
+    expect(mockedCore.setSecret).toHaveBeenCalledWith(expect.any(String));
+    expect(mockedCore.setOutput).toHaveBeenCalledWith('password', expect.any(String));
+  });
+
+  it('throws an error for missing inputs', async () => {
+    // set the inputs for the action
+    mockedCore.getInput.mockImplementation((name: string, options?: core.InputOptions) => {
+      throw new Error(`Missing input: ${name}`);
+    });
+
+    await run();
+
+    expect(mockedCore.setFailed).toHaveBeenCalledWith(expect.any(String));
+  });
+});
+
+
+
+
+
+// import {generateRandomPassword} from '../src/randompassword'
+// import * as process from 'process'
+// import * as cp from 'child_process'
+// import * as path from 'path'
+// import {expect, test} from '@jest/globals'
+
+
+//   test('generates a password with default options', () => {
+//     const password = generateRandomPassword(15,17);
+//     console.log(password)
+//     expect(password).toMatch(/^[a-zA-Z0-9]/);
+//   })
+
+//   test('generates a password with specified length', () => {
+//     const password = generateRandomPassword(20,20);
+//     console.log(password)
+//     expect(password).toHaveLength(20);
+//   })
+
+//   test('generates a password with special characters', () => {
+//     const password = generateRandomPassword(12, 12, true);
+//     console.log(password)
+//     expect(password).toMatch(/^[a-zA-Z0-9!@#$%^&*()_+\-={}[\]|;:,.<>?/~]{12}$/);
+//   });
+
+
