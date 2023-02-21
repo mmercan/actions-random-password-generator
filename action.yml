@@ -16,7 +16,12 @@ inputs:
     required: false
     description: 'in debug mode it will NOT hide the password'
     default: 'false'
-    
+
+outputs:
+  password:
+    description: 'random password'
+
+
 runs:
   using: 'node16'
   main: 'dist/index.js'

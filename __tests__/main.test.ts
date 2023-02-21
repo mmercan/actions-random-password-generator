@@ -18,7 +18,7 @@ describe('run', () => {
       if (name === 'min-length') return '12';
       if (name === 'max-length') return '12';
       if (name === 'use-special-chars') return 'false';
-      // if (name === 'debug') return 'false';
+      if (name === 'debug') return 'false';
       throw new Error(`Unknown input name: ${name}`);
     });
 
@@ -34,7 +34,7 @@ describe('run', () => {
       if (name === 'min-length') return '12';
       if (name === 'max-length') return '12';
       if (name === 'use-special-chars') return 'true';
-      // if (name === 'debug') return 'false';
+      if (name === 'debug') return 'false';
       throw new Error(`Unknown input name: ${name}`);
     });
 
@@ -54,6 +54,26 @@ describe('run', () => {
 
     expect(mockedCore.setFailed).toHaveBeenCalledWith(expect.any(String));
   });
+
+
+
+
+  it('sets the action output', async () => {
+
+    mockedCore.getInput.mockImplementation((name: string, options?: core.InputOptions) => {
+      if (name === 'min-length') return '12';
+      if (name === 'max-length') return '12';
+      if (name === 'use-special-chars') return 'true';
+      if (name === 'debug') return 'false';
+      throw new Error(`Unknown input name: ${name}`);
+    });
+
+
+    const setOutputMock = jest.spyOn(mockedCore, 'setOutput')
+    await run()
+    expect(setOutputMock).toHaveBeenCalledWith('password',expect.any(String)    )
+  });
+
 });
 
 
